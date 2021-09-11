@@ -40,7 +40,7 @@ param_component <- function(y, x, member = NULL, beta = NULL, omega = NULL, lamb
 # initialise parameters for all components
 # the returned list contains the data set as well, 
 # so that only one list needs pushing through the functions.
-object_mixture <- function(y, x, G, label = NULL, method = "kmeans", add_intercept = T) {
+object_mixture <- function(y, x, G, label = NULL, method = "kmeans", add_intercept = T, centre = T) {
   
   if (missing(y)) {
     stop("Response variable (y) is missing.")
@@ -57,8 +57,13 @@ object_mixture <- function(y, x, G, label = NULL, method = "kmeans", add_interce
   } else {
     x <- as.matrix(x)
   }
+  
   if (!all_numeric(x)) {
     stop("Not all covariates are numeric. Please convert non-numeric variables.")
+  }
+  
+  if (centre) {
+    x <- scale(x, scale = F)
   }
   
   lab <- label
@@ -83,10 +88,10 @@ object_mixture <- function(y, x, G, label = NULL, method = "kmeans", add_interce
   for (g in 1:G) {
     val$parameter[[g]] <- param_component(y, x, member = (lab == g))
   }
+  
   val$prop <- colSums(val$wt) / length(y)
   val$y    <- y
   val$x    <- x
-  
   val
 }	
 
