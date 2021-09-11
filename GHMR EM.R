@@ -206,14 +206,54 @@ BIC <- function(obj) {
   # 4 for sigma^2, beta, lambda, omega
   
   # prop:  G - 1 parameters
-  # total: G * (ncol(obj$x) + 4) + G - 1
+  # total: G * (ncol(obj$x) + 4) + G - 1.
   num_param <- G * (ncol(obj$x) + 4) + G - 1
   
   # BIC formula based on Schwarz (maximisation)
-  # 2 * log-likelihood - number of free parameters * log(n)
+  # 2 * log-likelihood - number of free parameters * log(n).
   2 * logl - num_param * log(length(obj$y))
 }
 
+
+model_selection <- function(y, x, G_range, sel_iter, init_method, criterion, add_intercept, centre) {
+  sapply(G_range, function(g, y, x, method, add_intercept, centre, sel_iter, criterion) {
+    tryCatch({
+      
+      # using tryCatch in case of errors from numerical issues
+      # caused by numDeriv.
+      
+      obj <- object_mixture(y, x, g, label = NULL, method, add_intercept, centre)
+      obj <- EM_fixed_iter(obj, sel_iter)
+      criterion(obj)
+    },
+    error = function(cond) {
+      message("Criterion value of -Inf will be returned due to error. The error could be numerical, or due to a component size being too small.")
+      message("Here is the original error message:")
+      message(cond)
+      return(-Inf)
+    },
+    finally = {}) 
+  }, y = y, x = x, method = init_method, add_intercept = add_intercept, centre = centre, sel_iter = sel_iter, criterion = criterion)
+}
+
+EM <- function(y, x, G_range = 1:8, label = NULL, init_method = "kmeans", 
+               criterion = BIC, sel_iter = 20, iter = NULL, eps = 0.01, max_iter = 5000, 
+               add_intercept = T, centre = T) {
+  
+  # IF label is NULL:
+  #   initialise with object_mixture for each G.
+  #   run EM_fixed_iter on all values in G_range.
+  #   select the best G based on sel_method.
+  # ELSE:
+  #   set G = number of classes in label.
+  
+  # run EM_fixed_iter or EM_until_converge on best G, based on NULLness of iter.
+  # report the best model object (including its BIC), and the BIC value of others from selection stage.
+  
+  selection <- model_selection(y, x, G_range, sel_iter, init_method, criterion, add_intercept, centre)
+  
+  selection
+}
 
 
 
