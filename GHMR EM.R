@@ -249,10 +249,30 @@ EM <- function(y, x, G_range = 1:8, label = NULL, init_method = "kmeans",
   
   # run EM_fixed_iter or EM_until_converge on best G, based on NULLness of iter.
   # report the best model object (including its BIC), and the BIC value of others from selection stage.
+  selection <- NULL
+  if (is.null(label)) {
+    selection <- model_selection(y, x, G_range, sel_iter, init_method, criterion, add_intercept, centre)
+    names(selection) <- G_range
+    G <- G_range[which.max(selection)]
+  } else {
+    G <- length(unique(label))
+  }
   
-  selection <- model_selection(y, x, G_range, sel_iter, init_method, criterion, add_intercept, centre)
+  obj <- object_mixture(y, x, G, label, init_method, add_intercept, centre)
+  if (!is.null(selection)) {
+    obj$BIC_all_G <- selection
+  }
   
-  selection
+  
+  
+  if (is.null(iter)) {
+    obj <- EM_until_converge(obj, eps, max_iter)
+  } else {
+    obj <- EM_fixed_iter(obj, iter)
+  }
+  
+  obj$BIC <- BIC(obj)
+  obj
 }
 
 
