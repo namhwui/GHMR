@@ -114,7 +114,7 @@ aitken <- function(loglik, eps = 0.01) {
   three <- tail(loglik, 3)
   accel <- (three[3] - three[2]) / (three[2] - three[1])
   asymp_loglik <- three[2] + (three[3] - three[2]) / (1 - accel)
-  difference <- asymp_loglik - three[2]
+  difference   <- asymp_loglik - three[2]
   
   if (is.nan(difference)) {
     return(F)
@@ -146,6 +146,38 @@ EM_fixed_iter <- function(obj, iter = 100) {
   }
   
   obj$loglik <- logl
+  obj$label <- MAP_label(obj)
+  obj$prop <- colSums(obj$wt) / length(obj$label)
+  obj
+}
+
+EM_until_converge <- function(obj, eps = 0.01, max_iter = 5000) {
+  
+  if (missing(obj)) {
+    stop("Data and parameter (obj) are missing.")
+  }
+  
+  G_count <- 1:length(obj$prop)
+  logl <- numeric(max_iter)
+  
+  ii <- 1
+  continue <- T
+  while ((ii <= max_iter) & continue)  {
+    obj$parameter <- lapply(G_count, function(g, obj) {
+      component_EM_once(obj$y, obj$x, obj$wt[, g], obj$param[[g]])
+    }, obj = obj) 
+    
+    temp     <- density_mixture(obj, F)
+    obj$wt   <- sweep(temp, 1, rowSums(temp), "/")
+    logl[ii] <- loglik(obj)
+    
+    if (ii >= 3) {
+      continue <- aitken(logl[1:ii], eps)
+    }
+    ii <- ii + 1
+  }
+  
+  obj$loglik <- logl[1:(ii - 1)]
   obj$label <- MAP_label(obj)
   obj$prop <- colSums(obj$wt) / length(obj$label)
   obj
