@@ -195,7 +195,7 @@ bic <- function(model) {
 
 BIC <- function(obj) {
   
-  if (missing(obj$loglik)) {
+  if (is.null(obj$loglik)) {
     stop("Log-likelihood value is missing. EM iterations are required for log-likelihood to be added to the model object.")
   }
   
@@ -213,3 +213,8 @@ BIC <- function(obj) {
   # 2 * log-likelihood - number of free parameters * log(n)
   2 * logl - num_param * log(length(obj$y))
 }
+
+
+
+
+
