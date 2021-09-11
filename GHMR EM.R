@@ -227,7 +227,7 @@ model_selection <- function(y, x, G_range, sel_iter, init_method, criterion, add
       criterion(obj)
     },
     error = function(cond) {
-      message("Criterion value of -Inf will be returned due to error. The error could be numerical, or due to a component size being too small.")
+      message("\n Criterion value of -Inf will be returned due to error. The error could be numerical, or due to a component size being too small.")
       message("Here is the original error message:")
       message(cond)
       return(-Inf)
