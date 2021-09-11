@@ -182,3 +182,34 @@ EM_until_converge <- function(obj, eps = 0.01, max_iter = 5000) {
   obj$prop <- colSums(obj$wt) / length(obj$label)
   obj
 }
+
+
+bic <- function(model) {
+  loglik <- tail(model$loglik, 1)
+  G      <- length(unique(model$map))
+  npar   <- G * (nrow(model$gpar[[1]]$gamma) + 4) + (G - 1)
+  val    <- 2 * loglik - npar * log(length(model$map))
+  return(val)
+}
+
+
+BIC <- function(obj) {
+  
+  if (missing(obj$loglik)) {
+    stop("Log-likelihood value is missing. EM iterations are required for log-likelihood to be added to the model object.")
+  }
+  
+  logl <- tail(obj$loglik, 1)
+  G <- length(obj$prop)
+  # number of parameters for in each component:
+  # ncol(obj$x) for regression coefficients
+  # 4 for sigma^2, beta, lambda, omega
+  
+  # prop:  G - 1 parameters
+  # total: G * (ncol(obj$x) + 4) + G - 1
+  num_param <- G * (ncol(obj$x) + 4) + G - 1
+  
+  # BIC formula based on Schwarz (maximisation)
+  # 2 * log-likelihood - number of free parameters * log(n)
+  2 * logl - num_param * log(length(obj$y))
+}
