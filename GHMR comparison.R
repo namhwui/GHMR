@@ -12,6 +12,10 @@ MAP <- function(wt) {
   
 }
 
+BIC_regmix <- function(model) {
+  2 * tail(model$loglik, 1) - log(length(model$y)) * (prod(dim(model$beta)) + length(model_GMM$sigma))
+}
+
 
 RandIndex <- function(lab1, lab2, adjusted = T) {
   val <- classAgreement(table(lab1, lab2))
