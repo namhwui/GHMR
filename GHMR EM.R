@@ -238,7 +238,13 @@ model_selection <- function(y, x, G_range, sel_iter, init_method, criterion, add
 
 EM <- function(y, x, G_range = 1:8, label = NULL, init_method = "kmeans", 
                criterion = BIC, sel_iter = 20, iter = NULL, eps = 0.01, max_iter = 5000, 
-               add_intercept = T, centre = T) {
+               add_intercept = T, centre = T, seed = NULL) {
+  
+  
+  # IF seed is given, set the seed
+  if (!is.numeric(seed)) {
+    set.seed(seed)
+  }
   
   # IF label is NULL:
   #   initialise with object_mixture for each G.
