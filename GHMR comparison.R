@@ -4,6 +4,15 @@
 # required libraries
 library(e1071)
 
+MAP <- function(wt) {
+  c(apply(wt, 1, function(x) {
+    possible_labels <- (1:length(x))[x == max(x)]
+    possible_labels[1]
+  }))
+  
+}
+
+
 RandIndex <- function(lab1, lab2, adjusted = T) {
   val <- classAgreement(table(lab1, lab2))
   if (adjusted) {
