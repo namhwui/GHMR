@@ -51,8 +51,8 @@ component_Estep <- function(y, x, param) {
     
     sqrt_AB <- sqrt(A * B)
     sqrt_AdB <- sqrt(A / B)
-    bK_ratio <- besselK(sqrt_AB, v + 1) / besselK(sqrt_AB, v)
-    
+    bK_ratio <- besselK(sqrt_AB, v + 1, expon.scaled = T) / besselK(sqrt_AB, v, expon.scaled = T)
+    print(any(is.nan(bK_ratio)))
     abc <- matrix(nrow = length(y), ncol = 3)
     abc[, 1] <- sqrt_AdB * bK_ratio
     abc[, 2] <- -2 * v / A + bK_ratio / sqrt_AdB
@@ -72,6 +72,7 @@ component_Mstep <- function(y, x, abc, wt, param) {
   abc_bar <- colSums(sweep(abc, 1, wt, "*")) / ng
   
   r <- y - x %*% param$gamma
+  #print(abc[, 1])
   param$beta <- abc_bar[2] * sum(wt * r) / sum(wt * abc[, 1])
   temp <- numeric(2)
   temp[1] <- sum(wt * abc[, 2] * r^2) / ng
@@ -264,7 +265,7 @@ EM <- function(y, x, G_range = 1:8, label = NULL, init_method = "kmeans",
     G <- length(unique(label))
   }
   
-  print(selection)
+ # print(selection)
   
   for (kk in 1:max_attempt) {
     tryCatch({
