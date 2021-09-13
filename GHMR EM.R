@@ -237,8 +237,8 @@ model_selection <- function(y, x, G_range, sel_iter, init_method, criterion, add
 }
 
 EM <- function(y, x, G_range = 1:8, label = NULL, init_method = "kmeans", 
-               criterion = BIC, sel_iter = 20, iter = NULL, eps = 0.01, max_iter = 5000, 
-               add_intercept = T, centre = T, seed = NULL) {
+               criterion = BIC, sel_iter = 100, iter = NULL, eps = 0.01, max_iter = 5000, 
+               add_intercept = T, centre = T, seed = NULL, max_attempt = 5) {
   
   
   # IF seed is given, set the seed
@@ -264,19 +264,33 @@ EM <- function(y, x, G_range = 1:8, label = NULL, init_method = "kmeans",
     G <- length(unique(label))
   }
   
-  obj <- object_mixture(y, x, G, label, init_method, add_intercept, centre)
-  if (!is.null(selection)) {
-    obj$BIC_all_G <- selection
+  print(selection)
+  
+  for (kk in 1:max_attempt) {
+    tryCatch({
+      obj <- object_mixture(y, x, G, label, init_method, add_intercept, centre)
+      if (!is.null(selection)) {
+        obj$BIC_all_G <- selection
+      }
+      
+      if (is.null(iter)) {
+        obj <- EM_until_converge(obj, eps, max_iter)
+      } else {
+        obj <- EM_fixed_iter(obj, iter)
+      }
+      break
+    },
+    error = function(cond) {
+      message("\n An error occurred. It's likely due to degenerate estimates.")
+      message(paste("Here is the original error:", cond))
+      message(paste0("Attempts used: ", kk, "/", max_attempt))
+    }, 
+    finally = {
+      #if (kk == max_attempt) {
+      #  stop("Max number of attempts reached with no convergence.")
+      #}
+    })
   }
-  
-  
-  
-  if (is.null(iter)) {
-    obj <- EM_until_converge(obj, eps, max_iter)
-  } else {
-    obj <- EM_fixed_iter(obj, iter)
-  }
-  
   obj$BIC <- BIC(obj)
   obj
 }
