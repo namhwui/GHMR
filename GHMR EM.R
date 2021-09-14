@@ -283,6 +283,13 @@ EM <- function(y, x, G_range = 1:8, label = NULL, init_method = "kmeans",
       } else {
         obj <- EM_fixed_iter(obj, iter)
       }
+      
+      # minimum threshold for scale parameter to avoid degenerate estimates
+      all_sigma2 <- sapply(obj$parameter, function(comp) {comp$sigma2})
+      if (any(all_sigma2 < 0.0001)) {
+        stop("The scale parameters are too small.")
+      }
+      
       break
     },
     error = function(cond) {
