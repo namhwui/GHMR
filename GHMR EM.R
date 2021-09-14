@@ -73,7 +73,7 @@ component_Mstep <- function(y, x, abc, wt, param) {
   
   r <- y - x %*% param$gamma
   #print(abc[, 1])
-  param$beta <- abc_bar[2] * sum(wt * r) / sum(wt * abc[, 1])
+  param$beta <- sum(wt * r) / sum(wt * abc[, 1])
   temp <- numeric(2)
   temp[1] <- sum(wt * abc[, 2] * r^2) / ng
   temp[2] <- -2 * param$beta * sum(wt * r) / ng 
