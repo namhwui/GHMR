@@ -6,7 +6,7 @@ source("GHMR density.R")
 
 # required packages
 library(numDeriv)
-library(fAsianOptions)
+library(Bessel)
 
 # logged Bessel K function as a function of index parameter (s)
 # needed for numerical derivatives
