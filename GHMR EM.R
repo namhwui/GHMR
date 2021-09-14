@@ -6,7 +6,7 @@ source("GHMR density.R")
 
 # required packages
 library(numDeriv)
-
+library(fAsianOptions)
 
 # logged Bessel K function as a function of index parameter (s)
 # needed for numerical derivatives
@@ -51,7 +51,11 @@ component_Estep <- function(y, x, param) {
     
     sqrt_AB <- sqrt(A * B)
     sqrt_AdB <- sqrt(A / B)
-    bK_ratio <- besselK(sqrt_AB, v + 1, expon.scaled = T) / besselK(sqrt_AB, v, expon.scaled = T)
+    
+    
+    bK_ratio <- BesselK(sqrt_AB, v + 1, expon.scaled = T) / BesselK(sqrt_AB, v, expon.scaled = T)
+    #bK_ratio <- besselK(sqrt_AB, v + 1, expon.scaled = T) / besselK(sqrt_AB, v, expon.scaled = T)
+    
     print(any(is.nan(bK_ratio)))
     abc <- matrix(nrow = length(y), ncol = 3)
     abc[, 1] <- sqrt_AdB * bK_ratio
