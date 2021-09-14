@@ -275,7 +275,7 @@ EM <- function(y, x, G_range = 1:8, label = NULL, init_method = "kmeans",
     tryCatch({
       obj <- object_mixture(y, x, G, label, init_method, add_intercept, centre)
       if (!is.null(selection)) {
-        obj$BIC_all_G <- selection
+        obj$criterion_all_G <- selection
       }
       
       if (is.null(iter)) {
@@ -303,7 +303,7 @@ EM <- function(y, x, G_range = 1:8, label = NULL, init_method = "kmeans",
       #}
     })
   }
-  obj$BIC <- BIC(obj)
+  obj$criterion <- criterion(obj)
   obj
 }
 
