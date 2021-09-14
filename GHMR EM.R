@@ -12,7 +12,7 @@ library(Bessel)
 # needed for numerical derivatives
 log_besselK_index <- function(x) {
   function(s) {
-    log(besselK(x, s, expon.scaled = T)) - x
+    log(BesselK(x, s, expon.scaled = T)) - x
   }
 }
 
@@ -26,7 +26,7 @@ update_omega <- function(abc_bar, param) {
     val <- numeric(3)
     val[1] <- (param$lambda - 1) * abc_bar[3]
     val[2] <- -s * sum(abc_bar[-3]) / 2
-    val[3] <- -log(besselK(s, param$lambda))
+    val[3] <- -log(BesselK(s, param$lambda))
     sum(val)
   }
   
@@ -56,7 +56,7 @@ component_Estep <- function(y, x, param) {
     bK_ratio <- BesselK(sqrt_AB, v + 1, expon.scaled = T) / BesselK(sqrt_AB, v, expon.scaled = T)
     #bK_ratio <- besselK(sqrt_AB, v + 1, expon.scaled = T) / besselK(sqrt_AB, v, expon.scaled = T)
     
-    print(any(is.nan(bK_ratio)))
+    #print(any(is.nan(bK_ratio)))
     abc <- matrix(nrow = length(y), ncol = 3)
     abc[, 1] <- sqrt_AdB * bK_ratio
     abc[, 2] <- -2 * v / A + bK_ratio / sqrt_AdB
