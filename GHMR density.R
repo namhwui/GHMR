@@ -17,7 +17,7 @@ density_GH <- function(y, x, param, logged = F, summed = F) {
     
     log_use_data <- matrix(nrow = length(y), ncol = 3)
     log_use_data[, 1] <- (lambda - 0.5) / 2 * (log(A) - log(B))
-    log_use_data[, 2] <- Bessel::BesselK(sqrt(A * B), nu = lambda - 0.5, expon.scaled = T)
+    log_use_data[, 2] <- Re(Bessel::BesselK(sqrt(A * B), nu = lambda - 0.5, expon.scaled = T))
     log_use_data[, 2] <- log(log_use_data[, 2]) - sqrt(A * B)
     log_use_data[, 3] <- (mu - y) * beta / sigma2
     
@@ -28,7 +28,7 @@ density_GH <- function(y, x, param, logged = F, summed = F) {
     
     log_no_data <- numeric(2)
     log_no_data[1] <- log(sqrt(2 * pi * sigma2))
-    log_no_data[2] <- Bessel::BesselK(omega, nu = lambda, expon.scaled = T)
+    log_no_data[2] <- Re(Bessel::BesselK(omega, nu = lambda, expon.scaled = T))
     log_no_data[2] <- log(log_no_data[2]) - omega
     
     apply(log_use_data, 1, sum) - sum(log_no_data)
