@@ -4,6 +4,8 @@
 # required libraries
 library(e1071)
 library(mixtools)
+library(RobMixReg)
+library(flexmix)
 
 MAP <- function(wt) {
   c(apply(wt, 1, function(x) {
@@ -33,7 +35,7 @@ Dist <- function(gamma_model, gamma_true) {
   G <- nrow(gamma_true)
   #gamma_model <- t(sapply(model$parameter, function(x) x$gamma))
   val <- as.matrix(dist(rbind(gamma_true, gamma_model)))
-  sum(val[(G + 1):nrow(val), 1:G])
+  sum(val[(G + 1):nrow(val), 1:G]) / G
 }
 
 
