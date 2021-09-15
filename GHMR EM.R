@@ -119,7 +119,7 @@ aitken <- function(loglik, eps = 0.01) {
   three <- tail(loglik, 3)
   accel <- (three[3] - three[2]) / (three[2] - three[1])
   asymp_loglik <- three[2] + (three[3] - three[2]) / (1 - accel)
-  difference   <- asymp_loglik - three[2]
+  difference   <- abs(asymp_loglik - three[2])
   
   if (is.nan(difference)) {
     return(F)
