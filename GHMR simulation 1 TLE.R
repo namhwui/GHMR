@@ -1,3 +1,5 @@
+source("GHMR comparison.R")
+
 model_list <- lapply(1:6, function(g) {
   model <- rmr(lr.method = "TLE", 
                formula   = as.formula("y ~ x"),
