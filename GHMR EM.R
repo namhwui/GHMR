@@ -12,7 +12,7 @@ library(Bessel)
 # needed for numerical derivatives
 log_besselK_index <- function(x) {
   function(s) {
-    log(BesselK(x, s, expon.scaled = T)) - x
+    log(Re(Bessel::BesselK(x, s, expon.scaled = T))) - x
   }
 }
 
@@ -26,7 +26,7 @@ update_omega <- function(abc_bar, param) {
     val <- numeric(3)
     val[1] <- (param$lambda - 1) * abc_bar[3]
     val[2] <- -s * sum(abc_bar[-3]) / 2
-    val[3] <- -log(BesselK(s, param$lambda))
+    val[3] <- -log(Re(Bessel::BesselK(s, param$lambda)))
     sum(val)
   }
   
@@ -53,7 +53,7 @@ component_Estep <- function(y, x, param) {
     sqrt_AdB <- sqrt(A / B)
     
     
-    bK_ratio <- BesselK(sqrt_AB, v + 1, expon.scaled = T) / BesselK(sqrt_AB, v, expon.scaled = T)
+    bK_ratio <- Re(Bessel::BesselK(sqrt_AB, v + 1, expon.scaled = F)) / Re(Bessel::BesselK(sqrt_AB, v, expon.scaled = F))
     #bK_ratio <- besselK(sqrt_AB, v + 1, expon.scaled = T) / besselK(sqrt_AB, v, expon.scaled = T)
     
     #print(any(is.nan(bK_ratio)))
@@ -74,7 +74,7 @@ component_Mstep <- function(y, x, abc, wt, param) {
   n <- length(wt)
   ng <- sum(wt)
   abc_bar <- colSums(sweep(abc, 1, wt, "*")) / ng
-  
+  #print(abc_bar)
   r <- y - x %*% param$gamma
   #print(abc[, 1])
   param$beta <- sum(wt * r) / sum(wt * abc[, 1])
@@ -286,7 +286,7 @@ EM <- function(y, x, G_range = 1:8, label = NULL, init_method = "kmeans",
       
       # minimum threshold for scale parameter to avoid degenerate estimates
       all_sigma2 <- sapply(obj$parameter, function(comp) {comp$sigma2})
-      if (any(all_sigma2 < 0.0001)) {
+      if (any(all_sigma2 < 1e-8)) {
         stop("The scale parameters are too small.")
       }
       
@@ -305,6 +305,65 @@ EM <- function(y, x, G_range = 1:8, label = NULL, init_method = "kmeans",
   }
   obj$criterion <- criterion(obj)
   obj
+}
+
+
+
+EM_all <- function(y, x, G_range = 1:8, label = NULL, init_method = "kmeans", 
+               criterion = BIC, iter = NULL, eps = 0.01, max_iter = 2000, 
+               add_intercept = T, centre = T, seed = NULL, max_attempt = 5) {
+  
+  
+  # IF seed is given, set the seed
+  if (!is.numeric(seed)) {
+    set.seed(seed)
+  }
+  
+  # IF label is NULL:
+  #   initialise with object_mixture for each G.
+  #   run EM_fixed_iter on all values in G_range.
+  #   select the best G based on sel_method.
+  # ELSE:
+  #   set G = number of classes in label.
+  
+  # run EM_fixed_iter or EM_until_converge on best G, based on NULLness of iter.
+  # report the best model object (including its BIC), and the BIC value of others from selection stage.
+  
+  model_list <- lapply(G_range, function(g) {
+    tryCatch({
+      obj <- object_mixture(y, x, g, label, init_method, add_intercept, centre)
+      model <- NULL
+      if (is.null(iter)) {
+        model <- EM_until_converge(obj, eps, max_iter)
+      } else {
+        model <- EM_fixed_iter(obj, iter)
+      }
+      
+      # minimum threshold for scale parameter to avoid degenerate estimates
+      all_sigma2 <- sapply(model$parameter, function(comp) {comp$sigma2})
+      if (any(all_sigma2 < 0.0001)) {
+        stop("The scale parameters are too small.")
+      }
+      
+      model$criterion <- criterion(model)
+      model
+      #break
+    },
+    error = function(cond) {
+      message("\n An error occurred. It's likely due to degenerate estimates.")
+      message(paste("Here is the original error:", cond))
+      #message(paste0("Attempts used: ", kk, "/", max_attempt))
+      list(criterion = -Inf)
+    }, 
+    finally = {})
+    #for (kk in 1:max_attempt) {}
+  })
+  
+  criterion_all <- sapply(model_list, function(model) {model$criterion})
+  print(criterion_all)
+  model_list[[which.max(criterion_all)]]
+  #model_list
+  
 }
 
 
