@@ -69,7 +69,7 @@ object_mixture <- function(y, x, G, label = NULL, method = "kmeans", add_interce
   lab <- label
   if (is.null(lab)) {
     if (method == "kmeans") {
-      lab <- kmeans(cbind(y, x), centers = G, nstart = 5, iter.max = 2)$cluster
+      lab <- kmeans(cbind(y, x), centers = G, nstart = 5, iter.max = 5)$cluster
     } else {
       stop("Other methods for label initialisation are not implemented yet.")
     }
