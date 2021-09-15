@@ -15,6 +15,7 @@ result1 <- pblapply(1:reps, function(ii) {
   source("GHMR simulation 1 GHMR.R", local = TRUE)
   return(result)
 }, cl = cl)
+saveRDS(result1, "GHMR simulation 1 GHMR.rds")
 
 result2 <- pblapply(1:reps, function(ii) {
   set.seed(ii)
@@ -23,7 +24,7 @@ result2 <- pblapply(1:reps, function(ii) {
   source("GHMR simulation 1 GMM.R", local = TRUE)
   return(result)
 }, cl = cl)
-
+saveRDS(result2, "GHMR simulation 1 GMM.rds")
 
 result3 <- pblapply(1:reps, function(ii) {
   set.seed(ii)
@@ -32,6 +33,7 @@ result3 <- pblapply(1:reps, function(ii) {
   source("GHMR simulation 1 RGMM.R", local = TRUE)
   return(result)
 }, cl = cl)
+saveRDS(result3, "GHMR simulation 1 RGMM.rds")
 
 result4 <- pblapply(1:reps, function(ii) {
   set.seed(ii)
@@ -40,9 +42,8 @@ result4 <- pblapply(1:reps, function(ii) {
   source("GHMR simulation 1 TLE.R", local = TRUE)
   return(result)
 }, cl = cl)
+saveRDS(result4, "GHMR simulation 1 TLE.rds")
 
 
-saveRDS(result1, "GHMR simulation 1 GHMR.rds")
-saveRDS(result1, "GHMR simulation 1 GMM.rds")
-saveRDS(result1, "GHMR simulation 1 RGMM.rds")
-saveRDS(result1, "GHMR simulation 1 TLE.rds")
+
+
