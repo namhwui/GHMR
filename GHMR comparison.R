@@ -37,7 +37,7 @@ Dist <- function(model, gamma_true) {
 }
 
 
-regmix_over_G <- function(y, x, G_range = 1:8, criterion = BIC_regmix, sel_iter = 50, max_iter = 2000,) {
+regmix_over_G <- function(y, x, G_range = 1:8, criterion = BIC_regmix, sel_iter = 50, max_iter = 2000) {
   criterion_over_G <- sapply(G_range, function(g) {
     model <- regmixEM(y, x, k = g, maxit = sel_iter)
     criterion(model)
