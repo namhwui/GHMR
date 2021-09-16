@@ -81,3 +81,65 @@ robmixreg_bic <- function(compcoef, data) {
   
   2 * sum(log(val)) - log(nrow(data)) * num_par 
 }
+
+
+combine_d <- function(gamma1, gamma2) {
+  angle <- sum(gamma1 * gamma2) / sqrt(sum(gamma1^2) * sum(gamma2^2))
+  distance <- sqrt(sum((gamma1 - gamma2)^2))
+  angle + distance
+}
+
+
+combined_label <- function(model) {
+  gamma_model <- t(sapply(1:length(model$prop), function(g) {
+    model$parameter[[g]]$gamma
+  }))
+  mat <- as.matrix(proxy::dist(gamma_model, method = combine_d))
+  mat[col(mat) >= row(mat)] <- Inf
+  to_combine <- which(mat == min(mat), arr.ind = T)
+  label0 <- model$label
+  label0[model$label %in% to_combine] <- to_combine[1]
+  if (min(label0) > 1) {
+    label0 <- label0 - 1
+  }
+  return(label0)
+}
+
+
+combine_components <- function(model, criterion) {
+  if (length(model$prop) == 1) {
+    message("Combining not applicable: There is only one component.")
+    return(model)
+  }
+  
+  if (length(model$prop) == 2) {
+    model1 <- EM(model$y, model$x, G_range = 1, max_iter = 1000, centre = F)
+    if (model$criterion > model1$criterion) {
+      return(model)
+    } else {
+      return(model1)
+    }
+  }
+  
+  continue <- T
+  criterion_new <- model$criterion
+  criterion_old <- model$criterion
+  while (continue) {
+    new_label <- combined_label(model)
+    new_model <- EM(model$y, model$x[, -1], label = new_label, max_iter = 1000, centre = F)
+    criterion_new <- new_model$criterion
+    
+    if (length(new_model$prop) > 2) {
+      if (criterion_new > criterion_old) {
+        model <- new_model
+      } else {
+        continue <- F
+        return(model)
+      }
+    } else {
+      combine_components(model, criterion)
+    }
+  }
+}
+
+
