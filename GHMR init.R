@@ -40,12 +40,12 @@ param_component <- function(y, x, member = NULL, beta = NULL, omega = NULL, lamb
 # initialise parameters for all components
 # the returned list contains the data set as well, 
 # so that only one list needs pushing through the functions.
-object_mixture <- function(y, x, G, label = NULL, method = "kmeans", add_intercept = T, centre = T) {
+object_mixture <- function(y, x, G = NULL, label = NULL, method = "kmeans", add_intercept = T, centre = T) {
   
   if (missing(y)) {
     stop("Response variable (y) is missing.")
   }
-  if (missing(G)) {
+  if (is.null(G) & is.null(label)) {
     stop("Component count (G) is missing.")
   }
   if (missing(x)) {
@@ -73,6 +73,8 @@ object_mixture <- function(y, x, G, label = NULL, method = "kmeans", add_interce
     } else {
       stop("Other methods for label initialisation are not implemented yet.")
     }
+  } else {
+    G <- length(unique(lab))
   }
   
   if (add_intercept) {
