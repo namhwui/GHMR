@@ -189,13 +189,6 @@ EM_until_converge <- function(obj, eps = 0.01, max_iter = 5000) {
 }
 
 
-bic <- function(model) {
-  loglik <- tail(model$loglik, 1)
-  G      <- length(unique(model$map))
-  npar   <- G * (nrow(model$gpar[[1]]$gamma) + 4) + (G - 1)
-  val    <- 2 * loglik - npar * log(length(model$map))
-  return(val)
-}
 
 
 BIC <- function(obj) {
