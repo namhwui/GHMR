@@ -24,4 +24,4 @@ y <- lapply(1:3,
             })
 data <- cbind(unlist(y), unlist(x))
 colnames(data) <- c("y", "x")
-plot(data[,2], data[,1], col = label)
+
