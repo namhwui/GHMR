@@ -67,7 +67,7 @@ robmixreg_bic <- function(compcoef, data) {
   
   individual_density <- function(x, y) {
     z <- sapply(1:ncol(compcoef), function(g) {
-      mu <- sum(cbind(1,x) * head(compcoef[, g], -2))
+      mu <- sum(c(1,x) * head(compcoef[, g], -2))
       return(tail(compcoef[, g], 1) * dnorm(y, mean = mu, sd = tail(compcoef[, g], 2)[1]))
     })
     return(sum(z))
