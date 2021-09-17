@@ -3,7 +3,7 @@ source("GHMR density.R")
 source("GHMR EM.R")
 source("GHMR comparison.R")
 
-ghmr <- EM_all(data[,2], data[,1], G_range = 1:6, max_iter = 1000, centre = F)
+ghmr <- EM_all(data[,1], data[,2], G_range = 1:6, max_iter = 1000, centre = F)
 
 gamma_model <- t(sapply(ghmr$parameter, function(comp) {
   comp$gamma
