@@ -124,6 +124,7 @@ combine_init <- function(model, old_label, new_label, pair) {
   model$parameter[[pair[2]]] <- NULL
   model$prop[pair[1]] <- sum(model$prop[pair])
   model$prop <- model$prop[-pair[2]]
+  model$label <- new_label
   
   model
 }
@@ -150,8 +151,8 @@ combine_components <- function(model, criterion) {
   while (continue) {
     val <- combined_label(model)
     print('here')
-    obj <- object_mixture(model$y, model$x[, -1], label = val$label, centre = F, add_intercept = F)
-    
+    #obj <- object_mixture(model$y, model$x[, -1], label = val$label, centre = F, add_intercept = F)
+    obj <- combine_init(model, model$label, val$label, val$pair)
     new_model <- EM(model$y, model$x[, -1], label = val$label, max_iter = 1000, centre = F)
     criterion_new <- new_model$criterion
     
