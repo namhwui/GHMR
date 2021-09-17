@@ -10,6 +10,7 @@ set.seed(50)
 fish <- read.csv("Fish.csv")
 data <- scale(fish[, -1])
 label <- fish$ï..Species
+label[!(label %in% c("Perch", "Bream"))] <- "Other"
 y <- data[, 1]
 x <- data[, -1]
 names(data) <- colnames(fish)[-1]
@@ -52,3 +53,36 @@ tle_list <- lapply(1:50, function(ii) {
       MaxIt     = 500, 
       nc        = G)
 })
+
+#saveRDS(ghmr_list, "GHMR fish GHMR.rds")
+#saveRDS(gmm_list, "GHMR fish GMM.rds")
+#saveRDS(rgmm_list, "GHMR fish RGMM.rds")
+#saveRDS(tle_list, "GHMR fish TLE.rds")
+ghmr_best <- which.max(sapply(ghmr_list, function(x) x$criterion))
+gmm_best <- which.max(sapply(gmm_list, function(x) x$criterion))
+rgmm_best <- which.max(sapply(rgmm_list, function(x) -stats::BIC(x)))
+tle_best <- which.max(sapply(tle_list, function(x) robmixreg_bic(x@compcoef, data)))
+
+c(ghmr_list[[ghmr_best]]$criterion, gmm_list[[gmm_best]]$criterion, -stats::BIC(rgmm_list[[rgmm_best]]), robmixreg_bic(tle_list[[tle_best]]@compcoef, data))
+c(RandIndex(label, ghmr_list[[ghmr_best]]$label), RandIndex(label, MAP(gmm_list[[gmm_best]]$posterior)), RandIndex(label, rgmm_list[[rgmm_best]]@cluster), RandIndex(label, tle_list[[tle_best]]@ctleclusters))
+
+proxy::dist(t(sapply(ghmr_list[[ghmr_best]]$parameter, function(x) x$gamma)), method = combine_d)
+
+
+# plots
+plot(density(data[, 1]),
+     main = "Fish Weight",
+     xlab = "Scaled weight")
+boxplot(data[,1] ~ label, main = "Fish Weight by Label", ylab = "Scaled weight")
+par(mfcol = c(2,2))
+boxplot(data[,1] ~ ghmr_list[[ghmr_best]]$label, main = "GHMR", xlab = "Label", ylab = "Scaled weight")
+boxplot(data[,1] ~ MAP(gmm_list[[gmm_best]]$posterior), main = "GMR", xlab = "Label", ylab = "Scaled weight")
+boxplot(data[,1] ~ rgmm_list[[rgmm_best]]@cluster, main = "RGMR", xlab = "Label", ylab = "Scaled weight")
+boxplot(data[,1] ~ tle_list[[tle_best]]@ctleclusters, main = "TLE", xlab = "Label", ylab = "Scaled weight")
+
+table(label, ghmr_list[[ghmr_best]]$label)
+table(label, MAP(gmm_list[[gmm_best]]$posterior))
+table(label, rgmm_list[[rgmm_best]]@cluster)
+table(label, tle_list[[tle_best]]@ctleclusters)
+
+
