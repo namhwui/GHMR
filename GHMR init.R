@@ -83,12 +83,12 @@ object_mixture <- function(y, x, G = NULL, label = NULL, method = "kmeans", add_
   
   val <- list()
   val$parameter <- list()
-  val$wt <- sapply(1:G, function(g) {
+  val$wt <- sapply(unique(lab), function(g) {
     (lab == g) * 1
   })
   
   for (g in 1:G) {
-    val$parameter[[g]] <- param_component(y, x, member = (lab == g))
+    val$parameter[[g]] <- param_component(y, x, member = (lab == unique(lab)[g]))
   }
   
   val$prop <- colSums(val$wt) / length(y)
