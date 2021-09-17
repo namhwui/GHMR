@@ -235,7 +235,7 @@ model_selection <- function(y, x, G_range, sel_iter, init_method, criterion, add
 }
 
 EM <- function(y, x, G_range = 1:8, label = NULL, init_method = "kmeans", 
-               criterion = BIC, sel_iter = 100, iter = NULL, eps = 0.01, max_iter = 5000, 
+               criterion = BIC, sel_iter = 50, iter = NULL, eps = 0.01, max_iter = 5000, 
                add_intercept = T, centre = T, seed = NULL, max_attempt = 5) {
   
   
