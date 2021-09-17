@@ -102,18 +102,41 @@ combined_label <- function(model) {
   if (min(label0) > 1) {
     label0 <- label0 - 1
   }
-  return(label0)
+  return(list(pair = to_combine, label = label0))
 }
 
+combine_init <- function(model, old_label, new_label, pair) {
+  
+  # sum up weight
+  u <- sum(model$wt[, pair[1]]) / sum(model$wt[, pair[1]] + model$wt[, pair[2]])
+  
+  # remove excess colum of weight
+  model$wt[, pair[1]] <- model$wt[, pair[1]] + model$wt[, pair[2]]
+  model$wt <- model$wt[, -pair[2]]
+  
+  # sum up component parameters
+  model$parameter[[pair[1]]]$gamma <- u * model$parameter[[pair[1]]]$gamma + (1 - u) * model$parameter[[pair[2]]]$gamma
+  model$parameter[[pair[1]]]$sigma2 <- u * model$parameter[[pair[1]]]$sigma2 + (1 - u) * model$parameter[[pair[2]]]$sigma2
+  model$parameter[[pair[1]]]$beta <- u * model$parameter[[pair[1]]]$beta + (1 - u) * model$parameter[[pair[2]]]$beta
+  model$parameter[[pair[1]]]$omega <- u * model$parameter[[pair[1]]]$omega + (1 - u) * model$parameter[[pair[2]]]$omega
+  model$parameter[[pair[1]]]$lambda <- u * model$parameter[[pair[1]]]$lambda + (1 - u) * model$parameter[[pair[2]]]$lambda
+  
+  model$parameter[[pair[2]]] <- NULL
+  model$prop[pair[1]] <- sum(model$prop[pair])
+  model$prop <- model$prop[-pair[2]]
+  
+  model
+}
 
 combine_components <- function(model, criterion) {
+  
   if (length(model$prop) == 1) {
-    message("Combining not applicable: There is only one component.")
+    print("Combining not applicable: There is only one component.")
     return(model)
   }
   
   if (length(model$prop) == 2) {
-    model1 <- EM(model$y, model$x, G_range = 1, max_iter = 1000, centre = F)
+    model1 <- EM(model$y, model$x[, -1], G_range = 1, max_iter = 1000, centre = F)
     if (model$criterion > model1$criterion) {
       return(model)
     } else {
@@ -125,19 +148,29 @@ combine_components <- function(model, criterion) {
   criterion_new <- model$criterion
   criterion_old <- model$criterion
   while (continue) {
-    new_label <- combined_label(model)
-    new_model <- EM(model$y, model$x[, -1], label = new_label, max_iter = 1000, centre = F)
+    val <- combined_label(model)
+    print('here')
+    obj <- object_mixture(model$y, model$x[, -1], label = val$label, centre = F, add_intercept = F)
+    
+    new_model <- EM(model$y, model$x[, -1], label = val$label, max_iter = 1000, centre = F)
     criterion_new <- new_model$criterion
     
-    if (length(new_model$prop) > 2) {
+    if (length(new_model$prop) >= 2) {
       if (criterion_new > criterion_old) {
+        print("combine")
         model <- new_model
       } else {
         continue <- F
         return(model)
       }
     } else {
-      combine_components(model, criterion)
+      print("two components left")
+      new_model <- EM(model$y, model$x[, -1], G_range = 1, max_iter = 1000, centre = F)
+      if (model$criterion > new_model$criterion) {
+        return(model)
+      } else {
+        return(new_model)
+      }
     }
   }
 }
