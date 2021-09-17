@@ -16,14 +16,17 @@ names(data) <- colnames(fish)[-1]
 
 
 ghmr_list <- lapply(1:50, function(ii) {
+  print(ii)
   EM(y, x, G_range = 1:6, sel_iter = 50, max_iter = 800, centre = F)
 })
 
 gmm_list <- lapply(1:50, function(ii) {
+  print(ii)
   regmix_over_G(y, as.matrix(x), G_range = 2:6)
 })
 
 rgmm_list <- lapply(1:50, function(ii) {
+  print(ii)
   val <- sapply(1:6, function(g) {
     model <- flexmix(y ~ x, data = data.frame(data), k = g, model = FLXMRrobglm(), control = list(iter = 50))
     -stats::BIC(model)
